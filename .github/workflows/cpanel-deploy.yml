@@ -53,7 +53,7 @@ jobs:
         run: |
           ssh hosting <<EOF 
           /usr/sbin/cloudlinux-selector destroy --json --interpreter nodejs --app-root $HOSTING_APP_ROOT
-          if [ -d apps/elementor_to_bigin/ ]; then 
+          if [ -d $HOSTING_APP_ROOT ]; then 
             rm -r $HOSTING_APP_ROOT
           fi
           EOF
