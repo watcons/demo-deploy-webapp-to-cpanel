@@ -11,8 +11,11 @@ jobs:
     name: Build and Deploy the API server.
     runs-on: ubuntu-latest
     env:
-      HOSTING_APP_ROOT: ${{ secrets.HOSTING_APP_ROOT }}
-      HOSTING_APP_DOMAIN: ${{ secrets.HOSTING_APP_DOMAIN }}
+      HOSTING_APP_INSTALL_DIRECTORY: ${{ secrets.HOSTING_APP_INSTALL_DIRECTORY }}
+      HOSTING_APP_DOMAIN: ${{ vars.HOSTING_APP_DOMAIN }}
+      HOSTING_APP_SUBDOMAIN: ${{ vars.HOSTING_APP_SUBDOMAIN }}
+      HOSTING_APP_FULLDOMAIN: ${{ vars.HOSTING_APP_SUBDOMAIN != '' && format('{0}.{1}', vars.HOSTING_APP_SUBDOMAIN, vars.HOSTING_APP_DOMAIN) || vars.HOSTING_APP_DOMAIN }}
+      HOSTING_APP_URLPATH: ${{ vars.HOSTING_APP_URLPATH }}
     steps:
       - name: Check out source
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
@@ -30,9 +33,14 @@ jobs:
 
       - name: Configure SSH
         run: |
+          # Ensure the SSH directory exists
           mkdir -p ~/.ssh/
-          echo "$HOSTING_SSH_PRIVATE_KEY" > ~/.ssh/hosting.key
+
+          # Create the SSH public key file, converting any inline '\n' characters to actual newlines
+          echo "$HOSTING_SSH_PRIVATE_KEY" | sed 's/\\n/\n/g' > ~/.ssh/hosting.key
           chmod 600 ~/.ssh/hosting.key
+
+          # Create the SSH config file describing how to connect to the 'hosting' host.
           cat >>~/.ssh/config <<END
           Host hosting
             HostName $HOSTING_SSH_HOST
@@ -49,31 +57,55 @@ jobs:
           HOSTING_SSH_USER: ${{ secrets.HOSTING_SSH_USER }}
           HOSTING_SSH_PRIVATE_KEY: ${{ secrets.HOSTING_SSH_PRIVATE_KEY }}
 
+      - name: Ensure the hosting domain exists
+        if: ${{ env.HOSTING_APP_SUBDOMAIN != '' }}
+        run: |
+          ssh hosting <<EOF
+
+          echo Full results:
+          uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN
+
+          echo
+          echo Parsed results
+          uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN | jq '.result.status'
+          echo 
+
+          DOMAIN_EXISTS=\$(uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN | jq '.result.status')
+          echo "Domain exists: \$DOMAIN_EXISTS"
+
+          if [ "\$DOMAIN_EXISTS" -ne "1" ]; then
+            echo "Creating domain $HOSTING_APP_FULLDOMAIN"
+            uapi --output=jsonpretty SubDomain addsubdomain domain='$HOSTING_APP_SUBDOMAIN' rootdomain='$HOSTING_APP_DOMAIN' dir='$HOSTING_APP_FULLDOMAIN'
+          else
+            echo "Domain $HOSTING_APP_FULLDOMAIN already exists"
+          fi
+          EOF
+
       - name: Destroy and remove the existing hosted node app, if any
         run: |
           ssh hosting <<EOF 
-          /usr/sbin/cloudlinux-selector destroy --json --interpreter nodejs --app-root $HOSTING_APP_ROOT
-          if [ -d $HOSTING_APP_ROOT ]; then 
-            rm -r $HOSTING_APP_ROOT
+          /usr/sbin/cloudlinux-selector destroy --json --interpreter nodejs --app-root $HOSTING_APP_INSTALL_DIRECTORY
+          if [ -d $HOSTING_APP_INSTALL_DIRECTORY ]; then 
+            rm -r $HOSTING_APP_INSTALL_DIRECTORY
           fi
           EOF
 
       - name: Create and stop the new hosted node app
         run: |
           ssh hosting <<EOF
-          /usr/sbin/cloudlinux-selector create --json --interpreter nodejs --domain $HOSTING_APP_DOMAIN --app-root $HOSTING_APP_ROOT --app-uri / --version 22 --app-mode production --startup-file dist/src/index.js
-          /usr/sbin/cloudlinux-selector stop --json --interpreter nodejs --app-root $HOSTING_APP_ROOT
+          /usr/sbin/cloudlinux-selector create --json --interpreter nodejs --domain $HOSTING_APP_FULLDOMAIN --app-root $HOSTING_APP_INSTALL_DIRECTORY --app-uri $HOSTING_APP_URLPATH --version 22 --app-mode production --startup-file dist/src/index.js
+          /usr/sbin/cloudlinux-selector stop --json --interpreter nodejs --app-root $HOSTING_APP_INSTALL_DIRECTORY
           EOF
 
       - name: Copy package.json and package-lock.json files
-        run: scp package.json package-lock.json "hosting:$HOSTING_APP_ROOT"
+        run: scp package.json package-lock.json "hosting:$HOSTING_APP_INSTALL_DIRECTORY"
 
       - name: Copy distribution
-        run: scp -r dist/ "hosting:$HOSTING_APP_ROOT"
+        run: scp -r dist/ "hosting:$HOSTING_APP_INSTALL_DIRECTORY"
 
       - name: Install modules and start the node app
         run: |
           ssh hosting <<EOF
-          /usr/sbin/cloudlinux-selector install-modules --json --interpreter nodejs --app-root $HOSTING_APP_ROOT
-          /usr/sbin/cloudlinux-selector start --json --interpreter nodejs --app-root $HOSTING_APP_ROOT
+          /usr/sbin/cloudlinux-selector install-modules --json --interpreter nodejs --app-root $HOSTING_APP_INSTALL_DIRECTORY
+          /usr/sbin/cloudlinux-selector start --json --interpreter nodejs --app-root $HOSTING_APP_INSTALL_DIRECTORY
           EOF
