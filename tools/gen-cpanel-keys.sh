@@ -28,6 +28,9 @@ mkdir -p $KEYSPATH
 # Produce a new 521 bit ECDSA key pair with no passphrase.
 ssh-keygen -t ecdsa -b 521 -f $KEYSPATH/cpanel.key -N ""
 
+# Create a single line version of the private key.
+awk '{printf "%s\\n", $0}' $KEYSPATH/cpanel.key > $KEYSPATH/cpanel.key.singleline
+
 # Produce an SSH configuration file that can be used to test SSH authentication.
 cat > $KEYSPATH/cpanel-test-ssh-config <<END
 Host hosting
