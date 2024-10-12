@@ -1,28 +1,11 @@
 {
-  "name": "demo-deploy-nodejs-to-cpanel",
+  "name": "demo-deploy-webapp-to-cpanel",
   "version": "0.1.0",
-  "description": "Demonstration of deploying a Node.js app to cPanel, using GitHub Workflow",
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "npm run build && node dist/src/index.js",
-    "build": "tsc",
-    "test": "jest --roots ./tests"
-  },
+  "description": "Demonstration of deploying a webapp to cPanel, using GitHub Workflow",
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.11.1",
-    "@types/jest": "^29.5.13",
-    "@types/node": "^22.7.4",
-    "eslint": "^9.11.1",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.5",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.8.0"
-  },
-  "dependencies": {
-    "@effect/language-service": "^0.1.0",
-    "@hono/node-server": "^1.13.1"
+    "@types/eslint__js": "^8.42.3"
   }
 }

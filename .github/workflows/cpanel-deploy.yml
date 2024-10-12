@@ -26,10 +26,13 @@ jobs:
           cache: "npm"
 
       - run: npm ci
+        working-directory: ./api
 
       - run: npm run build
+        working-directory: ./api
 
       - run: npm run test
+        working-directory: ./api
 
       - name: Configure SSH
         run: |
@@ -99,9 +102,11 @@ jobs:
 
       - name: Copy package.json and package-lock.json files
         run: scp package.json package-lock.json "hosting:$HOSTING_APP_INSTALL_DIRECTORY"
+        working-directory: ./api
 
       - name: Copy distribution
         run: scp -r dist/ "hosting:$HOSTING_APP_INSTALL_DIRECTORY"
+        working-directory: ./api
 
       - name: Install modules and start the node app
         run: |
