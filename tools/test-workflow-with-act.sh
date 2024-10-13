@@ -40,6 +40,7 @@ HOSTING_SSH_HOST_PORT=$HOSTING_SSH_HOST_PORT
 HOSTING_SSH_USER=$HOSTING_SSH_USER
 HOSTING_APP_INSTALL_DIRECTORY=$HOSTING_APP_INSTALL_DIRECTORY
 HOSTING_SSH_PRIVATE_KEY=$(cat $KEYSPATH/cpanel.key.singleline)
+HOSTING_WEB_INSTALL_DIRECTORY=$HOSTING_WEB_INSTALL_DIRECTORY
 END
 
 act --platform ubuntu-latest=catthehacker/ubuntu:act-latest --directory "$PROJECTPATH" --workflows "$PROJECTPATH/.github/workflows/cpanel-deploy.yml" --secret-file "$KEYSPATH/act-secrets" --var-file "$KEYSPATH/act-vars" 

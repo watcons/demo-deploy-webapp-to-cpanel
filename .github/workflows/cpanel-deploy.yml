@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_deploy:
-    name: Build and Deploy the API server.
+    name: Build and Deploy the Web and API servers.
     runs-on: ubuntu-latest
     env:
       HOSTING_APP_INSTALL_DIRECTORY: ${{ secrets.HOSTING_APP_INSTALL_DIRECTORY }}
@@ -16,6 +16,7 @@ jobs:
       HOSTING_APP_SUBDOMAIN: ${{ vars.HOSTING_APP_SUBDOMAIN }}
       HOSTING_APP_FULLDOMAIN: ${{ vars.HOSTING_APP_SUBDOMAIN != '' && format('{0}.{1}', vars.HOSTING_APP_SUBDOMAIN, vars.HOSTING_APP_DOMAIN) || vars.HOSTING_APP_DOMAIN }}
       HOSTING_APP_URLPATH: ${{ vars.HOSTING_APP_URLPATH }}
+      HOSTING_WEB_INSTALL_DIRECTORY: ${{ secrets.HOSTING_WEB_INSTALL_DIRECTORY }}
     steps:
       - name: Check out source
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
@@ -25,14 +26,25 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - run: npm ci
+      - name: Install API node modules
+        run: npm ci
         working-directory: ./api
 
-      - run: npm run build
+      - name: Build the API
+        run: npm run build
         working-directory: ./api
 
-      - run: npm run test
+      - name: Run the API tests
+        run: npm run test
         working-directory: ./api
+
+      - name: Install front-end node modules
+        run: npm ci
+        working-directory: ./front-end
+
+      - name: Build the front-end
+        run: npm run build
+        working-directory: ./front-end
 
       - name: Configure SSH
         run: |
@@ -65,24 +77,19 @@ jobs:
         run: |
           ssh hosting <<EOF
 
-          echo Full results:
-          uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN
-
-          echo
-          echo Parsed results
-          uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN | jq '.result.status'
-          echo 
-
           DOMAIN_EXISTS=\$(uapi --output=json DomainInfo single_domain_data domain=$HOSTING_APP_FULLDOMAIN | jq '.result.status')
-          echo "Domain exists: \$DOMAIN_EXISTS"
 
           if [ "\$DOMAIN_EXISTS" -ne "1" ]; then
             echo "Creating domain $HOSTING_APP_FULLDOMAIN"
-            uapi --output=jsonpretty SubDomain addsubdomain domain='$HOSTING_APP_SUBDOMAIN' rootdomain='$HOSTING_APP_DOMAIN' dir='$HOSTING_APP_FULLDOMAIN'
+            uapi --output=jsonpretty SubDomain addsubdomain domain='$HOSTING_APP_SUBDOMAIN' rootdomain='$HOSTING_APP_DOMAIN' dir='$HOSTING_WEB_INSTALL_DIRECTORY'
           else
             echo "Domain $HOSTING_APP_FULLDOMAIN already exists"
           fi
           EOF
+
+      - name: Copy front-end files
+        run: scp -r dist/* "hosting:$HOSTING_WEB_INSTALL_DIRECTORY"
+        working-directory: ./front-end
 
       - name: Destroy and remove the existing hosted node app, if any
         run: |
