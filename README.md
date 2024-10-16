@@ -93,3 +93,48 @@ now see a successful result.
 
 The GitHub Actions workflow makes use of various variables and secrets to control the cPanel provisioning
 and deployment process.
+
+Set the following [secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) and [variables](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#creating-configuration-variables-for-a-repository) on your repository.
+
+### Repository Secrets
+
+| Secret                  | Description                                                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| HOSTING_SSH_PRIVATE_KEY | Content of the private key for SSH authentication to cPanel. Use the contents of `tools/keys/cpanel.key.singleline`. |
+
+### Repository Variables
+
+| Variable                      | Example            | Description                                                                                                                   |
+| ----------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| HOSTING_APP_DOMAIN            | example.com        | The base domain to deploy the web app to. This is combined with `HOST_APP_SUBDOMAIN` to determine the full deployment domain. |
+| HOSTING_APP_SUBDOMAIN         | webapp             | The subdomain to deploy the web app to. Combined with `HOSTING_APP_DOMAIN` to determine the full deployment domain.           |
+| HOSTING_APP_URLPATH           | /api               | The path that the node application will be deployed to, relative to the full deployment domain.                               |
+| HOSTING_SSH_HOST              | cpanel.hosting.com | The hostname of the cPanel host to deploy to.                                                                                 |
+| HOSTING_SSH_HOST_PORT         | 722                | The port on the cPanel host to establish an SSH connection to.                                                                |
+| HOSTING_SSH_USER              | theuser            | The user to make the SSH connection as.                                                                                       |
+| HOSTING_APP_INSTALL_DIRECTORY | apps/webapp        | The path on the cPanel host's filesystem to install the node application's file to.                                           |
+| HOSTING_WEB_INSTALL_DIRECTORY | webapp.files       | The path on the cPanel host's filesystem to install the web front-end files to.                                               |
+
+![Screenshots of the secrets and variables lists for the repository in GitHub](docs/images/secrets-and-variables.png)
+
+## Enable GitHub Actions Workflows
+
+When a repository is forked on GitHub, Workflows are normally disabled by default.
+
+Before enabling workflows, you should review the contents of `.github/workflows` to ensure you
+are satisfied they are safe to run.
+
+To enable workflows, click the Actions tab for your repository and then click the _I understand
+my workflows, go ahead and enable them_ button.
+
+![Screen showing that GitHub Action Workflows are currently disabled](docs/images/enable-gh-actions.png)
+
+## Run the deployment GitHub Actions Workflow
+
+Once actions are enabled for your GitHub repository, the Actions tab should show the list of
+workflows available from the `.github/workflows` directory.
+
+Select the `Build and deploy to web cPanel with CloudLinux` workflow and then click the
+`Run workflow` button to launch the workflow.
+
+![](docs/images/run-workflow.png)
