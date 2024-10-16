@@ -137,4 +137,38 @@ workflows available from the `.github/workflows` directory.
 Select the `Build and deploy to web cPanel with CloudLinux` workflow and then click the
 `Run workflow` button to launch the workflow.
 
-![](docs/images/run-workflow.png)
+![Launch the workflow](docs/images/run-workflow.png)
+
+You can click through to view the workflow run and the results of each step in the workflow.
+![Show executed steps in workflow run](docs/images/workflow-run-results.png)
+
+## Test the deployment
+
+In your browser, visit the full deployment domain (i.e. combination of subdomain and domain).
+
+In our example we visit https://d031.watfordconsulting.com/ and see the demo web application's _Roll_ button.
+
+![Example web app before any rolls made](docs/images/demo-app-no-rolls.png)
+
+Repeatedly clicking the Roll button will cause the web app to POST to the node app API to trigger
+generation of a random number between 1 and 6.
+
+Each time the API response, it will include the last 10 rolls generated, demonstrating that state is maintained in the node app.
+
+![Example web app showing the result of six rolls](docs/images/demo-app-six-rolls.png)
+
+# Conclusion
+
+If you have successfully followed the above walkthrough, you should have seen the workflow do the following on your cPanel host:
+
+- create your deployment domain
+- create the NodeJS application and associate it with the deployment domain
+- build and deploy the NodeJS application
+- build and deploy the web front-end.
+
+The aim of this demo repository is to explore what aspects of cPanel hosting can be configured through scripting.
+It is also possible to use this approach to create MySQL/MariaDB databases which may be something your web application depends on.
+
+Please raise any issues if you encounter problems.
+
+Please create PRs if you have any improvements you would like to see.
