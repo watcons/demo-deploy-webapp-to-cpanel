@@ -108,7 +108,6 @@ Set the following [secrets](https://docs.github.com/en/actions/security-for-gith
 | ----------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | HOSTING_APP_DOMAIN            | example.com        | The base domain to deploy the web app to. This is combined with `HOST_APP_SUBDOMAIN` to determine the full deployment domain. |
 | HOSTING_APP_SUBDOMAIN         | webapp             | The subdomain to deploy the web app to. Combined with `HOSTING_APP_DOMAIN` to determine the full deployment domain.           |
-| HOSTING_APP_URLPATH           | /api               | The path that the node application will be deployed to, relative to the full deployment domain.                               |
 | HOSTING_SSH_HOST              | cpanel.hosting.com | The hostname of the cPanel host to deploy to.                                                                                 |
 | HOSTING_SSH_HOST_PORT         | 722                | The port on the cPanel host to establish an SSH connection to.                                                                |
 | HOSTING_SSH_USER              | theuser            | The user to make the SSH connection as.                                                                                       |
