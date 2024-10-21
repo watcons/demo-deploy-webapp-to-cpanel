@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     const getRolls = async () => {
-      const rollsResponse = await fetch("/api", { method: "GET" });
+      const rollsResponse = await fetch("/api/rolls", { method: "GET" });
       const rolls = await rollsResponse.json();
 
       setRolls(rolls);

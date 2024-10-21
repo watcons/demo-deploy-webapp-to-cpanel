@@ -14,7 +14,7 @@ api.use(logger());
 api.use(prettyJSON());
 api.use(secureHeaders());
 
-api.get("/", async (c) => {
+api.get("rolls", async (c) => {
   const rolls = await getRolls();
   return c.json(rolls);
 });
