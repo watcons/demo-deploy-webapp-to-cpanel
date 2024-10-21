@@ -2,6 +2,8 @@
   "name": "Node.js & TypeScript",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
 
+  "runArgs": ["--add-host=host.docker.internal:host-gateway"],
+
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
