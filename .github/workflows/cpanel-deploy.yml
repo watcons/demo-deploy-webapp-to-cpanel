@@ -17,6 +17,12 @@ jobs:
       HOSTING_APP_FULLDOMAIN: ${{ vars.HOSTING_APP_SUBDOMAIN != '' && format('{0}.{1}', vars.HOSTING_APP_SUBDOMAIN, vars.HOSTING_APP_DOMAIN) || vars.HOSTING_APP_DOMAIN }}
       HOSTING_APP_URLPATH: "/api"
       HOSTING_WEB_INSTALL_DIRECTORY: ${{ vars.HOSTING_WEB_INSTALL_DIRECTORY }}
+      MYSQL_DATABASE: ${{ vars.MYSQL_DATABASE }}
+      MYSQL_USER: ${{ vars.MYSQL_USER }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_HOST: ${{ vars.MYSQL_HOST }}
+      MYSQL_PORT: ${{ vars.MYSQL_PORT }}
+
     steps:
       - name: Check out source
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
@@ -72,6 +78,24 @@ jobs:
           HOSTING_SSH_USER: ${{ vars.HOSTING_SSH_USER }}
           HOSTING_SSH_PRIVATE_KEY: ${{ secrets.HOSTING_SSH_PRIVATE_KEY }}
 
+      - name: Ensure database exists
+        run: |
+          ssh hosting <<EOF
+          set -e
+          set -x
+
+          DATABASE_EXISTS=\$(uapi --output json Mysql list_databases | jq 'any(.result.data[]; .database == "$MYSQL_DATABASE")')
+
+          if [ "x\$DATABASE_EXISTS" != "xtrue" ]; then
+            echo "Creating database $MYSQL_DATABASE"
+            uapi --output=json Mysql create_database name='$MYSQL_DATABASE'
+            uapi --output=json Mysql create_user name='$MYSQL_USER' password='$MYSQL_PASSWORD'
+            uapi --output=json Mysql set_privileges_on_database user='$MYSQL_USER' database='$MYSQL_DATABASE' privileges='ALL PRIVILEGES'
+          else
+            echo "Database $MYSQL_DATABASE already exists"
+          fi
+          EOF
+
       - name: Ensure the hosting domain exists
         if: ${{ env.HOSTING_APP_SUBDOMAIN != '' }}
         run: |
@@ -114,6 +138,21 @@ jobs:
       - name: Copy distribution
         run: scp -r dist/ "hosting:$HOSTING_APP_INSTALL_DIRECTORY"
         working-directory: ./api
+
+      - name: Create the application's .env file
+        run: |
+          ssh hosting <<EOF
+          cat >$HOSTING_APP_INSTALL_DIRECTORY/.env <<END
+          NODE_ENV=production
+
+          # Connection details for the MySQL database.
+          MYSQL_DATABASE=$MYSQL_DATABASE
+          MYSQL_USER=$MYSQL_USER
+          MYSQL_PASSWORD=$MYSQL_PASSWORD
+          MYSQL_HOST=$MYSQL_HOST
+          MYSQL_PORT=$MYSQL_PORT
+          END
+          EOF
 
       - name: Install modules and start the node app
         run: |
