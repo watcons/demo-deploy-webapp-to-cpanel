@@ -2,9 +2,11 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
-
-const MAX_ROLLS = 10;
-let rolls: number[] = [];
+import {
+  createRoll,
+  getRolls,
+  trimRolls,
+} from "../../repositories/roll-repository";
 
 const api = new Hono().basePath("/api");
 
@@ -12,13 +14,18 @@ api.use(logger());
 api.use(prettyJSON());
 api.use(secureHeaders());
 
-api.get("/", (c) => {
-  return c.text("Hello, world!");
+api.get("/", async (c) => {
+  const rolls = await getRolls();
+  return c.json(rolls);
 });
 
-api.post("roll", (c) => {
-  const roll = Math.floor(Math.random() * 6) + 1;
-  rolls = [...rolls, roll].slice(-MAX_ROLLS);
+api.post("roll", async (c) => {
+  const newRollValue = Math.floor(Math.random() * 6) + 1;
+  await createRoll(newRollValue);
+
+  await trimRolls();
+
+  const rolls = await getRolls();
   return c.json(rolls);
 });
 

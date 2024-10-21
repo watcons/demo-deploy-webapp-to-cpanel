@@ -1,10 +1,16 @@
+import { initDb } from "../db";
 import * as restApi from "./api-server/server";
 
-restApi.serveRestApi(3000);
+async function main() {
+  await initDb();
+  restApi.serveRestApi(3000);
 
-process.on("SIGINT", () => {
-  restApi.stopRestApi();
-});
-process.on("SIGTERM", () => {
-  restApi.stopRestApi();
-});
+  process.on("SIGINT", () => {
+    restApi.stopRestApi();
+  });
+  process.on("SIGTERM", () => {
+    restApi.stopRestApi();
+  });
+}
+
+main();
