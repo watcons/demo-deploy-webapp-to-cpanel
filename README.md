@@ -5,6 +5,8 @@ Once SSH access has been enabled, the GitHub Actions workflow will provision a s
 application. It will then deploy the front-end (web) and back-end (node app) to the cPanel hosting
 service.
 
+For project-specific contributor guidance and recently verified operational notes, see [AGENTS.md](AGENTS.md).
+
 ## Pre-requisites
 
 - cPanel hosting service using CloudLinux with SSH access and NodeJS applications enabled.
