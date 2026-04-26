@@ -1,26 +1,25 @@
 {
-    "name": "demo-deploy-frontend-to-cpanel",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-      "react": "^18.3.1",
-      "react-dom": "^18.3.1"
-    },
-    "devDependencies": {
-      "@eslint/js": "^9.2.0",
-      "@types/react": "^18.3.3",
-      "@types/react-dom": "^18.3.0",
-      "@vitejs/plugin-react": "^4.7.0",
-      "typescript": "^5.4.5",
-      "vite": "^8.0.10",
-      "vite-plugin-checker": "^0.7.2",
-      "vite-plugin-svgr": "^4.5.0"
-    },
-    "scripts": {
-      "start": "vite --host",
-      "build": "vite build",
-      "test": "vite test",
-      "serve": "vite preview"
-    }
+  "name": "demo-deploy-frontend-to-cpanel",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.2.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^5.4.5",
+    "vite": "^8.0.10",
+    "vite-plugin-checker": "^0.13.0",
+    "vite-plugin-svgr": "^5.2.0"
+  },
+  "scripts": {
+    "start": "vite --host",
+    "build": "vite build",
+    "test": "vite test",
+    "serve": "vite preview"
   }
-  
+}
