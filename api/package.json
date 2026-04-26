@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@effect/language-service": "^0.1.0",
-    "@hono/node-server": "^1.13.1",
+    "@hono/node-server": "^1.19.13",
     "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
     "mysql2": "^3.11.3",
